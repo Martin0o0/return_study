@@ -8,11 +8,10 @@ import lombok.*;
 @ToString
 @Getter
 @Setter
-public class MemberDto {
-
+public class MemberResponseDto {
+    private Long id;
     private Integer studentId;
     private String name;
     private String generation;
     private String club;
-
 }
