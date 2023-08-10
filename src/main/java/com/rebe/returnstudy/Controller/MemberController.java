@@ -61,6 +61,5 @@ public class MemberController {
         else{
             return ResponseEntity.badRequest().build();
         }
-
     }
 }

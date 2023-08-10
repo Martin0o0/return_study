@@ -2,17 +2,17 @@ package com.rebe.returnstudy.Entity;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "member")
 public class Member {
     @Id
     @GeneratedValue
@@ -27,5 +27,15 @@ public class Member {
     @Column(nullable = false)
     private String club;
 
+    @OneToOne(mappedBy = "member")
+    @ToString.Exclude //순환참조 방지
+    private MemberDetails memberDetails;
 
+    @OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
+    @ToString.Exclude //순환참조
+    private List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<PostLike> postLikes = new ArrayList<>();
 }
