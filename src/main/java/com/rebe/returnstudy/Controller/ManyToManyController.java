@@ -11,13 +11,9 @@ public class ManyToManyController {
 
     private final PostLikeService postLikeService;
 
-    @GetMapping("many-to-many-save")
+    @GetMapping("many-to-many")
     public void Save(){
         postLikeService.SaveMemberAndPost();
     }
 
-    @GetMapping("many-to-many-read")
-    public void Read(){
-        postLikeService.ReadPostLike();
-    }
 }

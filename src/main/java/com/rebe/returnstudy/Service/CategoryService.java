@@ -47,12 +47,10 @@ public class CategoryService {
         Category category = new Category();
         category.setCategory("기상속보");
         category.getPosts().addAll(List.of(post1, post2)); //리스트에 담아서 저장하자.
-
         categoryRepository.save(category);
+
+        log.info("Category의 Posts : " + categoryRepository.findById(category.getId()).get().getPosts().toString());
     }
 
-    public void OneToManyPostHashTagRead(Long id){
-        log.info("Category의 Posts : " + categoryRepository.findById(id).get().getPosts().toString());
-    }
 
 }

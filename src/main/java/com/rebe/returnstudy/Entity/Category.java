@@ -22,7 +22,7 @@ public class Category {
     private String Category;
 
     @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id") //Post 엔티티에서 외래키를 관리하게 됨.
     @ToString.Exclude
     private List<Post> posts = new ArrayList<>();
 

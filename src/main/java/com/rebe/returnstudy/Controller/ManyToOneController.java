@@ -24,8 +24,4 @@ public class ManyToOneController {
         memberService.SaveAndReadMemberWithPost();
 
     }
-    @GetMapping("/many-to-one-post")
-    public void ManyToOne(){
-        memberService.ReadMemberPost(1L);
-    }
 }

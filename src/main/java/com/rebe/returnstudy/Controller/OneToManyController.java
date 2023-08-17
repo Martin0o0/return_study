@@ -11,12 +11,8 @@ public class OneToManyController {
 
     private final CategoryService categoryService;
 
-    @GetMapping("/one-to-many-category")
+    @GetMapping("/one-to-many")
     public void OneToManySave(){
         categoryService.OneToManyPostHashTagSave();
-    }
-    @GetMapping("/one-to-many-category-read")
-    public void OneToManyRead(){
-        categoryService.OneToManyPostHashTagRead(1L);
     }
 }

@@ -79,15 +79,15 @@ public class PostLikeService {
         postLike3.setPost(post2);
         postLike3.setMember(member1);
         postLikeRepository.save(postLike3);
-    }
 
-    public void ReadPostLike(){
+
         //회원 1이 좋아요를 누른 게시글 목록
-        log.info(postLikeRepository.findAllByMemberId(1L).stream().map(postLike -> postLike.getPost()).collect(Collectors.toList()).toString());
+        log.info(postLikeRepository.findAllByMemberId(member1.getId()).stream().map(postLike -> postLike.getPost()).collect(Collectors.toList()).toString());
 
         //게시글 1에 좋아요를 누른 회원 목록
-        log.info(postLikeRepository.findAllByPostId(1L).stream().map(postLike -> postLike.getMember()).collect(Collectors.toList()).toString());
+        log.info(postLikeRepository.findAllByPostId(post1.getId()).stream().map(postLike -> postLike.getMember()).collect(Collectors.toList()).toString());
     }
+
 
 
 }

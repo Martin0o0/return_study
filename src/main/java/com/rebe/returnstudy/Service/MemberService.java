@@ -10,10 +10,7 @@ import com.rebe.returnstudy.Repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 @Service //서비스 레이어의 클래스에 사용하는 컴포넌트 시리즈 어노테이션
@@ -28,13 +25,14 @@ public class MemberService {
 
     //Create
     public MemberResponseDto saveMember(MemberDto memberDto) {
+
         Member member = new Member();
         member.setName(memberDto.getName());
         member.setStudentId(memberDto.getStudentId());
         member.setGeneration(memberDto.getGeneration());
         member.setClub(memberDto.getClub());
+        memberRepository.save(member);
 
-       memberRepository.save(member);
         MemberResponseDto memberResponseDto = new MemberResponseDto();
         memberResponseDto.setId(member.getId());
         memberResponseDto.setName(member.getName());
@@ -100,13 +98,6 @@ public class MemberService {
     }
 
 
-
-
-
-
-
-
-
     public void SaveAndReadMemberWithPost(){
         Member member = new Member();
         member.setStudentId(2019102236);
@@ -114,22 +105,23 @@ public class MemberService {
         member.setGeneration("32nd");
         member.setClub("RETURN");
         memberRepository.save(member);
+
         Post post1 = new Post();
         post1.setTitle("이번에 태풍온다던데");
         post1.setContent("이번에 카눈이라는 어마무시한 태풍이 북상한데");
         post1.setMember(member);
+        postRepository.save(post1);
 
         Post post2 = new Post();
         post2.setTitle("경희대는 컴공 동아리는 리턴이 최고야!");
         post2.setContent("아님 말고 ㅋ");
         post2.setMember(member);
-        postRepository.save(post1);
         postRepository.save(post2);
+
+        log.info(memberRepository.findById(member.getId()).get().getPosts().toString());
     }
 
-    public void ReadMemberPost(long id){
-        System.out.println(memberRepository.findById(id).get().getPosts());
-    }
+
 
 
 
