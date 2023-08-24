@@ -20,7 +20,7 @@ public class MemberDetailsService {
     public void OneToOne(){
 
         Member member = new Member();
-        member.setStudentId(2019102236);
+        member.setStudentId("2019102236");
         member.setName("최현영");
         member.setGeneration("32nd");
         member.setClub("RETURN");
@@ -48,7 +48,7 @@ public class MemberDetailsService {
     public void OneToOneBidirect(){
 
         Member member = new Member();
-        member.setStudentId(2019102236);
+        member.setStudentId("2019102236");
         member.setName("최현영");
         member.setGeneration("32nd");
         member.setClub("RETURN");

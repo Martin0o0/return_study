@@ -19,7 +19,7 @@ public class Category {
     private Long id;
 
     @Column
-    private String Category;
+    private String category;
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id") //Post 엔티티에서 외래키를 관리하게 됨.

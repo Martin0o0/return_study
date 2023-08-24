@@ -9,8 +9,11 @@ import com.rebe.returnstudy.Repository.PostLikeRepository;
 import com.rebe.returnstudy.Repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,10 +25,42 @@ public class PostLikeService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
 
+
+
+    public ResponseEntity<?> likePost(Long id, String studentId){
+        Optional<Post> post = postRepository.findById(id);
+        Optional<Member> member = memberRepository.findByStudentId(studentId);
+        Optional<PostLike> postLike = postLikeRepository.findByMemberIdAndPostId(member.get().getId(), post.get().getId());
+        if (post.isPresent() && member.isPresent() && !postLike.isPresent()) {
+            PostLike newPostLike = new PostLike();
+            newPostLike.setPost(post.get());
+            newPostLike.setMember(member.get());
+            postLikeRepository.save(newPostLike);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<?> unlikePost(Long id, String studentId){
+        Optional<Post> post = postRepository.findById(id);
+        Optional<Member> member = memberRepository.findByStudentId(studentId);
+        Optional<PostLike> postLike = postLikeRepository.findByMemberIdAndPostId(member.get().getId(), post.get().getId());
+        if (post.isPresent() && member.isPresent() && postLike.isPresent()) {
+                postLikeRepository.delete(postLike.get());
+                return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
+
     public void SaveMemberAndPost(){
         //회원 1 저장
         Member member1 = new Member();
-        member1.setStudentId(2019102236);
+        member1.setStudentId("2019102236");
         member1.setName("최현영");
         member1.setGeneration("32nd");
         member1.setClub("RETURN");
@@ -33,7 +68,7 @@ public class PostLikeService {
 
         //회원 2 저장
         Member member2 = new Member();
-        member2.setStudentId(2019000000);
+        member2.setStudentId("2019000000");
         member2.setName("홍길동");
         member2.setGeneration("32nd");
         member2.setClub("RETURN");
@@ -41,7 +76,7 @@ public class PostLikeService {
 
         //회원 3 저장
         Member member3 = new Member();
-        member3.setStudentId(2023000000);
+        member3.setStudentId("2023000000");
         member3.setName("김나박이");
         member3.setGeneration("36th");
         member3.setClub("RETURN");

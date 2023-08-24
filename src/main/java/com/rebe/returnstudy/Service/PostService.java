@@ -1,13 +1,24 @@
 package com.rebe.returnstudy.Service;
 
 
+import com.rebe.returnstudy.DTO.PostRequestDto;
+import com.rebe.returnstudy.DTO.PostResponseDto;
+import com.rebe.returnstudy.Entity.Category;
 import com.rebe.returnstudy.Entity.Member;
 import com.rebe.returnstudy.Entity.Post;
+import com.rebe.returnstudy.Repository.CategoryRepository;
 import com.rebe.returnstudy.Repository.MemberRepository;
 import com.rebe.returnstudy.Repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,9 +29,108 @@ public class PostService {
 
     private final PostRepository postRepository;
 
-    public void SaveAndReadPostWriter(){
+    private final CategoryRepository categoryRepository;
+
+
+    @Transactional
+    public ResponseEntity<?> savePost(PostRequestDto postRequestDto) {
+        Optional<Member> writer = memberRepository.findByStudentId(postRequestDto.getStudentId());
+        if (writer.isPresent()) {
+            Post post = new Post();
+            post.setMember(writer.get());
+
+            post.setTitle(postRequestDto.getTitle());
+            post.setContent(postRequestDto.getContent());
+
+            postRepository.save(post);
+
+            Optional<Category> category = categoryRepository.findByCategory(postRequestDto.getCategory());
+            if (category.isPresent()) {
+                category.get().getPosts().add(post);
+                categoryRepository.save(category.get());
+            } else {
+                Category newCategory = new Category();
+                newCategory.setCategory(postRequestDto.getCategory());
+                newCategory.getPosts().add(post);
+                categoryRepository.save(newCategory);
+            }
+
+            Map<String, Long> response = new HashMap<>();
+            response.put("등록된 게시글 번호", post.getId());
+
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    public ResponseEntity<?> readPost(Long id){
+        Optional<Post> post = postRepository.findById(id);
+        if(post.isPresent()){
+            PostResponseDto postResponseDto = new PostResponseDto();
+            postResponseDto.setId(post.get().getId());
+            postResponseDto.setTitle(post.get().getTitle());
+            postResponseDto.setContent(post.get().getContent());
+            postResponseDto.setStudentId(post.get().getMember().getStudentId());
+            return new ResponseEntity<>(postResponseDto, HttpStatus.OK);
+        }
+        else{
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<?> updatePost(Long id, PostRequestDto postRequestDto) {
+        Optional<Post> post = postRepository.findById(id);
+        Optional<Member> member = memberRepository.findByStudentId(postRequestDto.getStudentId());
+        if (post.isPresent() && member.isPresent()) {
+            post.get().setMember(member.get());
+            post.get().setTitle(postRequestDto.getTitle());
+            post.get().setContent(postRequestDto.getContent());
+
+            postRepository.save(post.get());
+
+            Optional<Category> category = categoryRepository.findByCategory(postRequestDto.getCategory());
+            if (category.isPresent()) {
+                category.get().getPosts().add(post.get());
+                categoryRepository.save(category.get());
+            } else {
+                Category newCategory = new Category();
+                newCategory.setCategory(postRequestDto.getCategory());
+                newCategory.getPosts().add(post.get());
+                categoryRepository.save(newCategory);
+            }
+
+            Map<String, Long> response = new HashMap<>();
+            response.put("수정된 게시글 번호", post.get().getId());
+
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+        }
+    }
+
+
+    @Transactional
+    public ResponseEntity<Void> deletePost(Long id){
+        Optional<Post> post = postRepository.findById(id);
+        if (post.isPresent()) {
+            log.info("삭제됨");
+            postRepository.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
+
+
+
+    public void SaveAndReadPostWriter() {
         Member member = new Member();
-        member.setStudentId(2019102236);
+        member.setStudentId("2019102236");
         member.setName("최현영");
         member.setGeneration("32nd");
         member.setClub("RETURN");
@@ -41,14 +151,11 @@ public class PostService {
         postRepository.save(post2);
         log.info("저장한 게시글 ID : " + post2.getId());
 
-        log.info("saved post1 info : "  + postRepository.findById(post1.getId()).get());
-        log.info("saved post2 info : "  + postRepository.findById(post2.getId()).get());
+        log.info("saved post1 info : " + postRepository.findById(post1.getId()).get());
+        log.info("saved post2 info : " + postRepository.findById(post2.getId()).get());
         log.info("writer info : " + postRepository.findById(post1.getId()).get().getMember().toString());
 
     }
-
-
-
 
 
 }

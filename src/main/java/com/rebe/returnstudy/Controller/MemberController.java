@@ -1,8 +1,9 @@
 package com.rebe.returnstudy.Controller;
 
-import com.rebe.returnstudy.DTO.MemberDto;
+import com.rebe.returnstudy.DTO.MemberRequestDto;
 import com.rebe.returnstudy.DTO.MemberResponseDto;
 import com.rebe.returnstudy.Service.MemberService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,15 +36,15 @@ public class MemberController {
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<MemberResponseDto> registerMember(@RequestBody MemberDto memberDto){
-        System.out.println(memberDto.toString());
-        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.saveMember(memberDto));
+    public ResponseEntity<MemberResponseDto> registerMember(@Valid @RequestBody MemberRequestDto memberRequestDto){
+        System.out.println(memberRequestDto.toString());
+        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.saveMember(memberRequestDto));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<MemberResponseDto> registerMember(@PathVariable(value = "id") Long id, @RequestBody MemberDto memberDto){
-        System.out.println(memberDto.toString());
-        MemberResponseDto memberResponseDto = memberService.updateMember(id, memberDto);
+    public ResponseEntity<MemberResponseDto> registerMember(@PathVariable(value = "id") Long id, @Valid @RequestBody MemberRequestDto memberRequestDto){
+        System.out.println(memberRequestDto.toString());
+        MemberResponseDto memberResponseDto = memberService.updateMember(id, memberRequestDto);
 
         if(memberResponseDto == null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -62,4 +63,12 @@ public class MemberController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/orphan/{id}")
+    public ResponseEntity<Void> orphanMemberDetails(@PathVariable(value = "id")Long id){
+        memberService.MakeOrphanMeberDetail(id);
+        return ResponseEntity.ok().build();
+    }
+
+
 }

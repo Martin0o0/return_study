@@ -21,7 +21,7 @@ public class MemberDetails {
     private String phoneNumber;
 
     @Column(nullable = true, length = 255)
-    private String StatusMsg;
+    private String statusMsg;
 
     @Column
     private boolean isActive;
