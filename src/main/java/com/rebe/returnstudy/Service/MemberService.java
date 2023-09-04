@@ -6,10 +6,13 @@ import com.rebe.returnstudy.DTO.MemberResponseDto;
 import com.rebe.returnstudy.Entity.Member;
 import com.rebe.returnstudy.Entity.MemberDetails;
 import com.rebe.returnstudy.Entity.Post;
+import com.rebe.returnstudy.Exception.CustomException;
+import com.rebe.returnstudy.Exception.ErrCode;
 import com.rebe.returnstudy.Repository.MemberRepository;
 import com.rebe.returnstudy.Repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -81,7 +84,7 @@ public class MemberService {
 
             return memberResponseDto;
         } else {
-            return null;
+            throw new CustomException(ErrCode.NOT_FOUND_MEMBER, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -117,7 +120,7 @@ public class MemberService {
 
             return memberResponseDto;
         } else {
-            return null;
+            throw new CustomException(ErrCode.NOT_FOUND_MEMBER, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -129,7 +132,7 @@ public class MemberService {
             //member 삭제시, 연관된 memberDetails 엔티티도 삭제된다.
             return true;
         } else {
-            return false;
+            throw new CustomException(ErrCode.NOT_FOUND_MEMBER, HttpStatus.NOT_FOUND);
         }
     }
 
