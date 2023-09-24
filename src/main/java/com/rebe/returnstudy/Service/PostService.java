@@ -6,6 +6,8 @@ import com.rebe.returnstudy.DTO.PostResponseDto;
 import com.rebe.returnstudy.Entity.Category;
 import com.rebe.returnstudy.Entity.Member;
 import com.rebe.returnstudy.Entity.Post;
+import com.rebe.returnstudy.Exception.CustomException;
+import com.rebe.returnstudy.Exception.ErrCode;
 import com.rebe.returnstudy.Repository.CategoryRepository;
 import com.rebe.returnstudy.Repository.MemberRepository;
 import com.rebe.returnstudy.Repository.PostRepository;
@@ -64,18 +66,17 @@ public class PostService {
         }
     }
 
-    public ResponseEntity<?> readPost(Long id){
+    public ResponseEntity<?> readPost(Long id) {
         Optional<Post> post = postRepository.findById(id);
-        if(post.isPresent()){
+        if (post.isPresent()) {
             PostResponseDto postResponseDto = new PostResponseDto();
             postResponseDto.setId(post.get().getId());
             postResponseDto.setTitle(post.get().getTitle());
             postResponseDto.setContent(post.get().getContent());
             postResponseDto.setStudentId(post.get().getMember().getStudentId());
             return new ResponseEntity<>(postResponseDto, HttpStatus.OK);
-        }
-        else{
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else {
+            throw new CustomException(ErrCode.NOT_FOUND_POST, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -83,49 +84,53 @@ public class PostService {
     public ResponseEntity<?> updatePost(Long id, PostRequestDto postRequestDto) {
         Optional<Post> post = postRepository.findById(id);
         Optional<Member> member = memberRepository.findByStudentId(postRequestDto.getStudentId());
-        if (post.isPresent() && member.isPresent()) {
-            post.get().setMember(member.get());
-            post.get().setTitle(postRequestDto.getTitle());
-            post.get().setContent(postRequestDto.getContent());
+        if (member.isPresent()) {
+            if (post.isPresent()) {
 
-            postRepository.save(post.get());
 
-            Optional<Category> category = categoryRepository.findByCategory(postRequestDto.getCategory());
-            if (category.isPresent()) {
-                category.get().getPosts().add(post.get());
-                categoryRepository.save(category.get());
+                post.get().setMember(member.get());
+                post.get().setTitle(postRequestDto.getTitle());
+                post.get().setContent(postRequestDto.getContent());
+
+                postRepository.save(post.get());
+
+                Optional<Category> category = categoryRepository.findByCategory(postRequestDto.getCategory());
+                if (category.isPresent()) {
+                    category.get().getPosts().add(post.get());
+                    categoryRepository.save(category.get());
+                } else {
+                    Category newCategory = new Category();
+                    newCategory.setCategory(postRequestDto.getCategory());
+                    newCategory.getPosts().add(post.get());
+                    categoryRepository.save(newCategory);
+                }
+
+                Map<String, Long> response = new HashMap<>();
+                response.put("수정된 게시글 번호", post.get().getId());
+
+                return new ResponseEntity<>(response, HttpStatus.CREATED);
             } else {
-                Category newCategory = new Category();
-                newCategory.setCategory(postRequestDto.getCategory());
-                newCategory.getPosts().add(post.get());
-                categoryRepository.save(newCategory);
+                throw new CustomException(ErrCode.NOT_FOUND_POST, HttpStatus.NOT_FOUND);
             }
-
-            Map<String, Long> response = new HashMap<>();
-            response.put("수정된 게시글 번호", post.get().getId());
-
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
         } else {
-            return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+            throw new CustomException(ErrCode.NOT_FOUND_MEMBER, HttpStatus.FORBIDDEN);
         }
     }
 
 
+
+
     @Transactional
-    public ResponseEntity<Void> deletePost(Long id){
+    public ResponseEntity<Void> deletePost(Long id) {
         Optional<Post> post = postRepository.findById(id);
         if (post.isPresent()) {
             log.info("삭제됨");
             postRepository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new CustomException(ErrCode.NOT_FOUND_POST, HttpStatus.NOT_FOUND);
         }
     }
-
-
-
-
 
 
     public void SaveAndReadPostWriter() {
