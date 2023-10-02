@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -35,8 +36,8 @@ public class PostService {
 
 
     @Transactional
-    public ResponseEntity<?> savePost(PostRequestDto postRequestDto) {
-        Optional<Member> writer = memberRepository.findByStudentId(postRequestDto.getStudentId());
+    public ResponseEntity<?> savePost(PostRequestDto postRequestDto, Principal principal) {
+        Optional<Member> writer = memberRepository.findByStudentId(principal.getName());
         if (writer.isPresent()) {
             Post post = new Post();
             post.setMember(writer.get());

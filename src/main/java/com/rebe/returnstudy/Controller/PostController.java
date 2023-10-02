@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/return")
@@ -43,8 +46,8 @@ public class PostController {
 
     //PostService
     @PostMapping("/post")
-    public ResponseEntity<?> createPost(@Valid @RequestBody PostRequestDto postRequestDto) {
-        return postService.savePost(postRequestDto);
+    public ResponseEntity<?> createPost(@Valid @RequestBody PostRequestDto postRequestDto, Principal principal) {
+        return postService.savePost(postRequestDto, principal);
     }
 
 

@@ -1,5 +1,7 @@
 package com.rebe.returnstudy.Controller;
 
+import com.rebe.returnstudy.DTO.LoginRequestDto;
+import com.rebe.returnstudy.DTO.LoginResponseDto;
 import com.rebe.returnstudy.DTO.MemberRequestDto;
 import com.rebe.returnstudy.DTO.MemberResponseDto;
 import com.rebe.returnstudy.Service.MemberService;
@@ -7,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -71,4 +74,14 @@ public class MemberController {
     }
 
 
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto){
+        return memberService.login(loginRequestDto);
+    }
+
+
+    @GetMapping("/admin/members")
+    public ResponseEntity<?> getMembers(){
+        return memberService.getMembers();
+    }
 }

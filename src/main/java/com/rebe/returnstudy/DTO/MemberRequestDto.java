@@ -1,5 +1,6 @@
 package com.rebe.returnstudy.DTO;
 
+import com.rebe.returnstudy.Entity.Role;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -17,6 +18,13 @@ public class MemberRequestDto {
     private String name;
     @NotBlank
     private String generation;
+
+    @NotBlank
+    private String password;
+
+    @NotBlank
+    private String role; //ROLE_ADMIN, ROLE_USER
+
     @NotBlank
     private String club;
     //chy0310@khu.ac.kr처럼 @khu.ac.kr의 도메인 이메일 주소만 허용

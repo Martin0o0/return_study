@@ -3,6 +3,8 @@ package com.rebe.returnstudy.Exception;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+import java.util.function.Supplier;
+
 
 @Getter
 public class CustomException extends RuntimeException{

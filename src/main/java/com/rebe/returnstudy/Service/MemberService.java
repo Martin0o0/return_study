@@ -1,11 +1,14 @@
 package com.rebe.returnstudy.Service;
 
 
+import com.rebe.returnstudy.DTO.LoginRequestDto;
+import com.rebe.returnstudy.DTO.LoginResponseDto;
 import com.rebe.returnstudy.DTO.MemberRequestDto;
 import com.rebe.returnstudy.DTO.MemberResponseDto;
 import com.rebe.returnstudy.Entity.Member;
 import com.rebe.returnstudy.Entity.MemberDetails;
 import com.rebe.returnstudy.Entity.Post;
+import com.rebe.returnstudy.Entity.Role;
 import com.rebe.returnstudy.Exception.CustomException;
 import com.rebe.returnstudy.Exception.ErrCode;
 import com.rebe.returnstudy.Repository.MemberRepository;
@@ -13,18 +16,32 @@ import com.rebe.returnstudy.Repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service //서비스 레이어의 클래스에 사용하는 컴포넌트 시리즈 어노테이션
 @RequiredArgsConstructor
 @Slf4j
-public class MemberService {
+public class MemberService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
 
     private final PostRepository postRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
+
+    private final JwtService jwtService;
+
+
 
 
     //Create
@@ -35,6 +52,15 @@ public class MemberService {
         member.setStudentId(memberRequestDto.getStudentId());
         member.setGeneration(memberRequestDto.getGeneration());
         member.setClub(memberRequestDto.getClub());
+
+        //Role을 구별
+        if(memberRequestDto.getRole().equals("ROLE_ADMIN")){
+            member.setRole(Role.ROLE_ADMIN.getRole());
+        }else{
+            member.setRole(Role.ROLE_USER.getRole());
+        }
+        member.setPassword(passwordEncoder.encode(memberRequestDto.getPassword()));
+
 
 
         MemberDetails memberDetails = new MemberDetails();
@@ -61,7 +87,7 @@ public class MemberService {
         memberResponseDto.setEmail(memberDetails.getEmail());
         memberResponseDto.setPhoneNumber(memberDetails.getPhoneNumber());
         memberResponseDto.setStatusMsg(memberDetails.getStatusMsg());
-
+        log.info("회원가입 성공");
 
         return memberResponseDto;
 
@@ -173,9 +199,38 @@ public class MemberService {
     }
 
 
+    @Override
+    public UserDetails loadUserByUsername(String username) {
+       log.info("사용자 아이디 : " + username);
+       return memberRepository.findByStudentId(username).orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없음"));
+    }
 
+    public ResponseEntity<LoginResponseDto> login(LoginRequestDto loginRequestDto) {
+        Member member = memberRepository.findByStudentId(loginRequestDto.getId())
+                .orElseThrow(() -> new CustomException(ErrCode.NOT_FOUND_MEMBER, HttpStatus.NOT_FOUND));
+        if(!passwordEncoder.matches(loginRequestDto.getPassword(), member.getPassword())){
+            throw new CustomException(ErrCode.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
+        }else{
+            LoginResponseDto loginResponseDto = new LoginResponseDto();
+            loginResponseDto.setId(member.getStudentId());
+            loginResponseDto.setJWT(jwtService.generateToken(member.getStudentId(), member.getRole()));
+            return new ResponseEntity<LoginResponseDto>(loginResponseDto, HttpStatus.OK);
+        }
+    }
 
-
-
-
+    public ResponseEntity<?> getMembers() {
+        List<MemberResponseDto> response = new ArrayList<>();
+        List<Member> members = memberRepository.findAll();
+        for(Member member : members){
+            MemberResponseDto memberResponseDto = new MemberResponseDto();
+            memberResponseDto.setId(member.getId());
+            memberResponseDto.setEmail(member.getMemberDetails().getEmail());
+            memberResponseDto.setClub(member.getClub());
+            memberResponseDto.setName(member.getName());
+            memberResponseDto.setPhoneNumber(member.getMemberDetails().getPhoneNumber());
+            memberResponseDto.setStudentId(member.getStudentId());
+            response.add(memberResponseDto);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
