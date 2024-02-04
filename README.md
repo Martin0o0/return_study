@@ -13,3 +13,5 @@
 기간 : 2023.07.14. ~ 2023.09.29.
 
 
+강의 자료 : https://polyester-run-a32.notion.site/2023-e7b459a64dd64dabbab1ffc436bb64dd
+
